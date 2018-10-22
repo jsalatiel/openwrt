@@ -1070,6 +1070,15 @@ service_triggers()
 	config_foreach add_interface_trigger relay
 }
 
+build_ethers() {
+  cat /etc/hosts  |grep -v "^#" | grep '^192\.\|^10\.\|^172.16' | awk '{
+  if (NF>5) {
+      for(i = 6; i <= NF; i++) { printf $i"," }
+          print $1
+      }
+  }'  > /tmp/dhcphostsfile.conf
+}
+
 boot()
 {
 	BOOT=1
@@ -1091,7 +1100,7 @@ start_service() {
 			fi
 		fi
 	}
-
+	build_ethers
 	config_load dhcp
 
 	if [ -n "$instance" ]; then
