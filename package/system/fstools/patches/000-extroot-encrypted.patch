@@ -1,0 +1,22 @@
+--- b/block.c	2018-10-21 15:50:34.608399284 -0300
++++ a/block.c	2018-10-21 16:01:17.929600431 -0300
+@@ -1423,6 +1423,19 @@
+ 		return -1;
+ 	}
+ 
++  if ( access( "/tmp/jffs_cfg/upper/etc/extrootkey", F_OK ) != -1  ) {
++      if (delay_root){
++        ULOG_INFO("extroot: encrypted device not present, retrying in %u seconds\n", delay_root);
++        sleep(delay_root);
++      }
++      make_devs();
++      if (system("awk -F: '{print \"cryptsetup luksDump \"$1\" &>/dev/null && echo \"$2\" | cryptsetup luksOpen \"$1\" cextroot\"}' /tmp/jffs_cfg/upper/etc/extrootkey | sh")) {
++        ULOG_INFO("extroot: decrypted successfully\n");
++      } else {
++        ULOG_ERR("extroot: device is not encrypted or wrong key\n");
++      }
++  }
++
+ 	/* Find block device pointed by the mount config */
+ 	pr = find_block_info(m->uuid, m->label, m->device);
+ 
