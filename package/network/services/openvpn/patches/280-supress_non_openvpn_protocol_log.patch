@@ -1,0 +1,23 @@
+diff -urN openvpn-2.4.5/src/openvpn/socket.c openvpn-2.4.5.new/src/openvpn/socket.c
+--- openvpn-2.4.5/src/openvpn/socket.c	2018-03-01 04:22:17.000000000 -0300
++++ openvpn-2.4.5.new/src/openvpn/socket.c	2018-10-21 17:09:23.786640063 -0300
+@@ -1144,8 +1144,8 @@
+ tcp_connection_established(const struct link_socket_actual *act)
+ {
+     struct gc_arena gc = gc_new();
+-    msg(M_INFO, "TCP connection established with %s",
+-        print_link_socket_actual(act, &gc));
++    //msg(M_INFO, "TCP connection established with %s",
++    //    print_link_socket_actual(act, &gc));
+     gc_free(&gc);
+ }
+ 
+@@ -2595,7 +2595,7 @@
+         {
+             if (!is_openvpn_protocol(&sb->buf))
+             {
+-                msg(D_STREAM_ERRORS, "Non-OpenVPN client protocol detected");
++                //msg(D_STREAM_ERRORS, "Non-OpenVPN client protocol detected");
+                 sb->port_share_state = PS_FOREIGN;
+                 sb->error = true;
+                 return false;
