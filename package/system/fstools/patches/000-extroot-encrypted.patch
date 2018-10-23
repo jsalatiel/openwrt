@@ -11,9 +11,9 @@
 +      }
 +      make_devs();
 +      if (system("awk -F: '{print \"cryptsetup luksDump \"$1\" &>/dev/null && echo \"$2\" | cryptsetup luksOpen \"$1\" cextroot\"}' /tmp/jffs_cfg/upper/etc/extrootkey | sh")) {
-+        ULOG_INFO("extroot: decrypted successfully\n");
-+      } else {
 +        ULOG_ERR("extroot: device is not encrypted or wrong key\n");
++      } else {
++        ULOG_INFO("extroot: decrypted successfully\n");
 +      }
 +  }
 +
