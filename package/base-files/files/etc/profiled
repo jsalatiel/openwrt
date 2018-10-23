@@ -1,0 +1,144 @@
+export PATH=$PATH:$HOME/bin:/usr/local/bin
+export HISTFILE=/var/cache/$USER.history
+export HISTTIMEFORMAT="%d/%m/%Y %T "
+export HISTCONTROL=ignoreboth
+export TZ=GMT+3
+
+if [ -n "$FAILSAFE" ] || [ -n "$PREINIT" ] ; then
+	return 0 #FAILSAFE
+fi
+
+__prompt_command() {
+    local curr_exit="$?"
+
+    local BRed='\[\e[0;91m\]'
+    local RCol='\[\e[0m\]'
+
+    PS1='\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+
+    if [ -n "$TMOUT2" ] ; then
+        export TMOUT=$TMOUT2
+        unset TMOUT2
+    fi
+
+    if [ "$curr_exit" != 0 ] && [ "$curr_exit" != 130 ] ; then
+        PS1="[${BRed}$curr_exit${RCol}]$PS1"
+        export TMOUT2=$TMOUT
+        unset TMOUT
+    fi
+}
+
+# Show exit status on failure.
+if [ $SHELL == "/bin/bash" ] ; then
+        PROMPT_COMMAND=__prompt_command
+fi
+
+export TMOUT=600
+
+
+if which vim &>/dev/null ; then
+        alias vi=vim
+fi
+
+if which gammu &>/dev/null ; then
+        alias gammu="/usr/bin/gammu -c /etc/gammu-default.conf"
+fi
+
+if which vnstat &>/dev/null ; then
+	alias vnstat="vnstat -u &>/dev/null; vnstat"
+fi
+
+if which aria2c &>/dev/null ; then
+	alias aria2c="aria2c --file-allocation=none"
+fi
+
+if which nano &>/dev/null ; then
+       export EDITOR=nano
+elif which vim &>/dev/null ; then
+        export EDITOR=vim
+else
+        export EDITOR=vi
+fi
+
+if which htop &>/dev/null ; then
+        alias top="htop"
+fi
+
+if which elinks &>/dev/null ; then
+        alias links="elinks"
+fi
+
+alias nano="nano -v"
+alias netconfig="$(which $EDITOR) /etc/config/network"
+alias wificonfig="$(which $EDITOR) /etc/config/wireless"
+alias dhcpconfig="$(which $EDITOR) /etc/config/dhcp"
+alias fwconfig="$(which $EDITOR) /etc/config/firewall"
+alias sysconfig="$(which $EDITOR) /etc/config/system"
+alias ps="ps --"
+alias ll='ls -la'
+alias netstat='watch -n3 netstat -pntl --'
+alias ether-wake='ether-wake  -i br-lan'
+alias ipl="watch -n5 iptables --line-numbers -nvL"
+alias ipn="watch -n5 iptables -t nat --line-numbers -nvL"
+alias ipm="watch -n5 iptables -t mangle --line-numbers -nvL"
+alias sudo="sudo "
+
+if which mwan3 &>/dev/null ; then
+        alias mws='watch -n5 "mwan3 interfaces ; mwan3  policies"'
+fi
+
+# alias wrr='watch -n3 "tc -s class ls dev imq0 | grep -i hostname"'
+
+if which tc-viewer &>/dev/null ; then
+        alias tcin='tc-viewer  --conf /tmp/tc-viewer.conf --iface=imq0'
+        alias tcout='tc-viewer --conf /tmp/tc-viewer.conf --iface=imq1'
+fi
+
+if which netdiscover  &>/dev/null ; then
+        alias lanscan="netdiscover -c10 -r \$(uci get network.lan.ipaddr)/24 -i br-lan"
+        alias netdiscover="netdiscover -c10 -r \$(uci get network.lan.ipaddr)/24 -i br-lan"
+fi
+
+if which nmap  &>/dev/null ; then
+        alias lanscan="nmap -sP \$(uci get network.lan.ipaddr)/24"
+fi
+
+if which tcpdump  &>/dev/null ; then
+        alias tcpdump.arp='tcpdump -nni br-lan -vv  -n port 67 or port 68 or arp'
+        alias tcpdump.dns='tcpdump -nni br-lan -vv  -n port 53'
+fi
+
+uptime
+echo
+echo  Free space:  $(df -h | grep overlay$ | awk '{print $4}')
+[ -x "$(which conntrack)" ]  && echo  Established connections:  $(conntrack -C)
+if [ -x "$(which fortune)" ] ; then
+        echo
+        fortune -s
+fi
+echo
+
+alias conn="ip route | grep default | awk '{print \"Connected via \"\$5\" ...\" }'"
+
+if ! which nano &>/dev/null ; then
+	alias nano=$EDITOR
+fi	
+
+if [ -d /var/lib/vnstat ]  ; then
+        if which vnstat &>/dev/null ; then
+                 vnstat
+        fi
+fi
+
+
+alias conn="ip route | grep default | awk '{print \"Connected via \"\$5\" ...\" }'"
+echo Checking connectivity...
+if ! ip route | grep -q default ; then
+	echo Disconnected.
+elif ping -c1 -w1 www.google.com 1>/dev/null 2>&1 ; then
+        conn
+elif ping -c1 -w1 8.8.8.8 1>/dev/null 2>&1 ; then
+                echo 'Error: connected but dns resolution is not working'
+fi
+
+echo

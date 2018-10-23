@@ -57,3 +57,6 @@ service() {
 	}
 	/etc/init.d/$@
 }
+
+[ -f /etc/profiled ] && source /etc/profiled
+
