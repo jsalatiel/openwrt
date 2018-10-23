@@ -63,11 +63,20 @@ proto_3g_setup() {
 				SIERRA=1
 			elif echo "$cardinfo" | grep -qi huawei; then
 				case "$service" in
-					umts_only) CODE="14,2";;
-					gprs_only) CODE="13,1";;
-					*) CODE="2,2";;
+					lte_only)
+						export MODE='AT^SYSCFGEX="03",3FFFFFFF,2,4,40,,';;
+					prefer_lte)
+						export MODE='AT^SYSCFGEX="030201",3FFFFFFF,2,4,7FFFFFFFFFFFFFFF,,';;
+					umts_only) 
+						#export MODE='AT^SYSCFGEX="02",00400000,2,4,7FFFFFFFFFFFFFFF,,';;
+						export MODE="AT^SYSCFG=14,2,3FFFFFFF,2,4";;
+					gprs_only)
+						export MODE="AT^SYSCFG=13,1,3FFFFFFF,2,4";;
+					*) 
+						export MODE="AT^SYSCFG=2,2,3FFFFFFF,2,4";;
+
 				esac
-				export MODE="AT^SYSCFG=${CODE},3FFFFFFF,2,4"
+				logger Setting HUAWEI mode to $service \($MODE\)
 			fi
 
 			if [ -n "$pincode" ]; then

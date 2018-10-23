@@ -210,6 +210,8 @@ proto_pppoe_init_config() {
 	proto_config_add_string "ac"
 	proto_config_add_string "service"
 	proto_config_add_string "host_uniq"
+	proto_config_add_string "ipaddr"
+	proto_config_add_string "netmask"
 	lasterror=1
 }
 
@@ -227,6 +229,10 @@ proto_pppoe_setup() {
 	json_get_var ac ac
 	json_get_var service service
 	json_get_var host_uniq host_uniq
+	json_get_var ipaddr ipaddr
+	json_get_var netmask netmask
+
+	[ -n "$ipaddr" ] && [ -n "$netmask" ] && ifconfig $iface $ipaddr netmask $netmask up
 
 	ppp_generic_setup "$config" \
 		plugin rp-pppoe.so \
