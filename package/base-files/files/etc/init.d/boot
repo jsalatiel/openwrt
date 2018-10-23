@@ -48,4 +48,14 @@ boot() {
 	
 	# temporary hack until configd exists
 	/sbin/reload_config
+
+
+################
+        dmesg -n 8
+        # netconsole=[src-port]@[src-ip]/[<dev>],[tgt-port]@<tgt-ip>/[tgt-macaddr]
+        # run nc -l -u -p 6666 to read
+        /usr/sbin/insmod netconsole netconsole=@192.168.1.1/$(uci get network.lan.ifname),@192.168.1.254/
+	echo netconsole loaded
+################
+
 }
