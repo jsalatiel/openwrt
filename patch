@@ -1,0 +1,32 @@
+#!/bin/bash
+
+
+
+
+BASENAME=$(readlink -f "$2"/../)
+
+echo
+echo Running $0 com parametros $*
+echo Customizing ...
+echo
+sleep 3
+cp  -av $BASENAME/build_dir/target*/linux-[!f]*/linux-4*/net/netfilter/*IMQ*ko $1/lib/modules/*/
+cp  -av $BASENAME/build_dir/target*/linux-[!f]*/linux-4*/drivers/net/imq.ko $1/lib/modules/*/
+cp  -av $BASENAME/build_dir/target*/linux-[!f]*/iptables*/extensions/libxt_IMQ.so $1/usr/lib/iptables
+cp  -av $BASENAME/build_dir/target*/linux-[!f]*/iptables*/extensions/libxt_IMQ.so $1/usr/lib/iptables
+cp  -av $BASENAME/build_dir/target*/linux-[!f]*/linux-4*/drivers/net/netconsole.ko $1/lib/modules/*/
+cp  -av $BASENAME/build_dir/target*/linux-[!f]*/linux-4*/net/sched/sch_htb.ko $1/lib/modules/*/
+
+chmod +s $1/usr/bin/sudo -v
+chmod 0440 $1/etc/sudoers -v
+chmod 700 $1/root -v
+
+# CRIANDO PAR DE CHAVES
+mkdir -p  $1/root/.ssh/ 
+ssh-keygen  -t rsa -b 4096 -f $1/root/.ssh/id_rsa  -N "" -C ""
+$BASENAME/dropbearconvert openssh dropbear $1/root/.ssh/id_rsa $1/root/.ssh/id_rsa.db
+chmod 700 $1/root/.ssh/
+
+echo /dev/mmcblk0p1:$(dd if=/dev/urandom bs=1024 count=128  |  tr -dc 'a-zA-Z0-9'  | fold -w128 | head -1) > $1/etc/extrootkey
+
+sleep 10
