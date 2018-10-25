@@ -39,6 +39,8 @@ endef
 
 define Package/iftop/install	
 	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/root
+	$(CP) files/iftoprc $(1)/root/.iftoprc
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/iftop $(1)/usr/bin/
 endef
 
