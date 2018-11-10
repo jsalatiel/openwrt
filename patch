@@ -1,8 +1,5 @@
 #!/bin/bash
 
-
-
-
 BASENAME=$(readlink -f "$2"/../)
 
 echo
@@ -22,8 +19,6 @@ chmod 0440 $1/etc/sudoers -v
 chmod 700 $1/root -v
 
 
-rm -f $1/etc/
-
 # CRIANDO PAR DE CHAVES
 mkdir -p  $1/root/.ssh/ 
 ssh-keygen  -t rsa -b 4096 -f $1/root/.ssh/id_rsa  -N "" -C "openwrt default key"
@@ -34,5 +29,6 @@ chmod 700 $1/root/.ssh/
 echo Save config if compiled OK
 cp -v $BASENAME/.config $1/build.config
 mkdir -p $BASENAME/configs && cp -v $BASENAME/.config  $BASENAME/configs/config.$(date +%F-%R) -v
-readlink 
-sleep 5
+cd $BASENAME/configs && ls -1rt  | grep -v diff | tail -2 | xargs -n2 -r diff -urN > $BASENAME/configs/config.$(date +%F-%R).diff; cd -
+
+sleep 2
