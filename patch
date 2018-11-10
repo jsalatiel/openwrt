@@ -27,6 +27,6 @@ ssh-keygen  -t rsa -b 4096 -f $1/root/.ssh/id_rsa  -N "" -C ""
 $BASENAME/dropbearconvert openssh dropbear $1/root/.ssh/id_rsa $1/root/.ssh/id_rsa.db
 chmod 700 $1/root/.ssh/
 
-echo /dev/mmcblk0p1:$(dd if=/dev/urandom bs=1024 count=128  |  tr -dc 'a-zA-Z0-9'  | fold -w128 | head -1) > $1/etc/extrootkey
+#echo /dev/mmcblk0p1:$(dd if=/dev/urandom bs=1024 count=128  |  tr -dc 'a-zA-Z0-9'  | fold -w128 | head -1) > $1/etc/extrootkey
 
-sleep 10
+sleep 2

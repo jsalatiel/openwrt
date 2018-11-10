@@ -1,0 +1,33 @@
+#!/bin/sh
+if [ $# != 1 ] ; then
+    echo Use $0 extroot_partition
+    exit 1
+fi
+
+which cryptsetup  &>/dev/null || exit 2
+
+PARTITION="$1"
+ENCRYPTED_NAME=cextroot
+ENCRYPTED_DEVICE=/dev/mapper/$ENCRYPTED_NAME
+TEMP_MP=/tmp/overlay
+ROOTFS_DATA=$(cat /proc/mtd | grep rootfs_data | awk -F: '{print $1}'| sed 's@mtd@mtdblock@g')
+
+PASS=$(dd if=/dev/urandom bs=1024 count=128  |  tr -dc 'a-zA-Z0-9'  | fold -w128 | head -1)
+echo $PARTITION:$PASS > /etc/extrootkey
+echo $PASS | cryptsetup luksFormat -c aes-cbc-essiv:sha256 -s 256 -h sha256 $PARTITION && \
+    echo $PASS | cryptsetup luksOpen $PARTITION $ENCRYPTED_NAME && \
+        mkfs.f2fs -f $ENCRYPTED_DEVICE  && mkdir -p $TEMP_MP && mount $ENCRYPTED_DEVICE $TEMP_MP && \
+tar -C /overlay -cvf - . | tar -C $TEMP_MP -xf - && \
+     		       block detect | sed "s@/mnt/cextroot@/overlay@g"  > /etc/config/fstab || exit 3
+cat >>  $TEMP_MP/upper/etc/config/fstab <<-EOF2
+	config 'mount'
+		option target	/overlay-boot
+		option device	/dev/$ROOTFS_DATA
+		option fstype	jffs2
+		option options	ro,sync
+		option enabled	1
+		option enabled_fsck 0
+EOF2
+mkdir -p $TEMP_MP/upper/overlay-boot
+
+umount $TEMP_MP && cryptsetup luksClose $ENCRYPTED_DEVICE && vi /etc/config/fstab

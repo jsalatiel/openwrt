@@ -103,6 +103,11 @@ if which nmap  &>/dev/null ; then
         alias lanscan="nmap -sP \$(uci get network.lan.ipaddr)/24"
 fi
 
+if which nmap-mini  &>/dev/null ; then
+        alias lanscan="nmap-mini -sP \$(uci get network.lan.ipaddr)/24"
+	alias nmap=nmap-mini
+fi
+
 if which tcpdump  &>/dev/null ; then
         alias tcpdump.arp='tcpdump -nni br-lan -vv  -n port 67 or port 68 or arp'
         alias tcpdump.dns='tcpdump -nni br-lan -vv  -n port 53'
@@ -135,9 +140,9 @@ alias conn="ip route | grep default | awk '{print \"Connected via \"\$5\" ...\" 
 echo Checking connectivity...
 if ! ip route | grep -q default ; then
 	echo Disconnected.
-elif ping -c1 -w1 www.google.com 1>/dev/null 2>&1 ; then
+elif ping -c1 -w3 www.google.com 1>/dev/null 2>&1 ; then
         conn
-elif ping -c1 -w1 8.8.8.8 1>/dev/null 2>&1 ; then
+elif ping -c1 -w3 8.8.8.8 1>/dev/null 2>&1 ; then
                 echo 'Error: connected but dns resolution is not working'
 fi
 

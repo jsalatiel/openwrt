@@ -122,6 +122,7 @@ define Package/blockd/install
 	$(INSTALL_DIR) $(1)/sbin $(1)/etc/init.d/
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/blockd $(1)/sbin/
 	$(INSTALL_BIN) ./files/blockd.init $(1)/etc/init.d/blockd
+	$(INSTALL_BIN) ./files/mkcryptoextroot $(1)/sbin/mkcryptoextroot
 endef
 
 define Build/InstallDev
