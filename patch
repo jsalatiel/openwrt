@@ -6,7 +6,7 @@
 BASENAME=$(readlink -f "$2"/../)
 
 echo
-echo Running $0 com parametros $*
+echo Running $0 com parametros $* dentro do caminho $(pwd)
 echo Customizing ...
 echo
 sleep 3
@@ -21,12 +21,18 @@ chmod +s $1/usr/bin/sudo -v
 chmod 0440 $1/etc/sudoers -v
 chmod 700 $1/root -v
 
+
+rm -f $1/etc/
+
 # CRIANDO PAR DE CHAVES
 mkdir -p  $1/root/.ssh/ 
-ssh-keygen  -t rsa -b 4096 -f $1/root/.ssh/id_rsa  -N "" -C ""
+ssh-keygen  -t rsa -b 4096 -f $1/root/.ssh/id_rsa  -N "" -C "openwrt default key"
 $BASENAME/dropbearconvert openssh dropbear $1/root/.ssh/id_rsa $1/root/.ssh/id_rsa.db
 chmod 700 $1/root/.ssh/
 
 #echo /dev/mmcblk0p1:$(dd if=/dev/urandom bs=1024 count=128  |  tr -dc 'a-zA-Z0-9'  | fold -w128 | head -1) > $1/etc/extrootkey
-
-sleep 2
+echo Save config if compiled OK
+cp -v $BASENAME/.config $1/build.config
+mkdir -p $BASENAME/configs && cp -v $BASENAME/.config  $BASENAME/configs/config.$(date +%F-%R) -v
+readlink 
+sleep 5
