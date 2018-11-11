@@ -1,0 +1,35 @@
+#!/bin/sh
+export PATH=$PATH:/usr/local/bin:/root/bin
+
+
+FILE=/etc/hosts
+
+if [ $# != 2 ] ; then
+        echo Use $0 \$iface list\|listfull\|info
+        exit 1
+fi
+
+iface=$1
+command=$2
+
+parse() {
+   while read data ; do
+        ADDRESS=$(echo $data  | grep -i station | cut -d  " " -f2)
+        if [ -n "$ADDRESS" ]  ; then
+                NAME=$(grep $ADDRESS $FILE | cut -d " " -f2)
+        fi
+        [ `echo $data | grep -ci station` == 1 ] && echo
+        echo $data | sed "s@Station@Station $NAME@g"
+   done
+}
+
+if [ $command == 'list' ] ; then
+         iw dev $iface station dump | grep -i 'station\|bitrate' | parse
+elif [ $command == 'listfull' ] ; then
+         iw dev $iface station dump | parse
+elif [ $command == 'info' ] ; then
+        iw dev $iface info
+else
+        echo Use $0 \$iface list\|listfull\|info
+fi
+

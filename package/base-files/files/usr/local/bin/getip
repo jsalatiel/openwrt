@@ -1,0 +1,20 @@
+#!/bin/sh
+umask 022
+export PATH=$PATH:/usr/local/bin:/root/bin
+
+PRIMARY=$(ip route | grep ^default | head -1 | awk '{print $5}') && \
+	[ -n "$PRIMARY" ] && /sbin/ifconfig $PRIMARY | grep -i inet | awk '{print $2}' | awk -F ":" '{print $2}' > /tmp/ip_primary
+BACKUP=$(ip route | grep ^default | tail -1 | awk '{print $5}') && [ -n "$BACKUP" ] && \
+	/sbin/ifconfig $BACKUP | grep -i inet | awk '{print $2}' | awk -F ":" '{print $2}' > /tmp/ip_secondary
+
+
+if [ $# == 0  ] ; then
+	INTERFACE=$(ip route | grep ^default | head -1 | awk '{print $5}')
+else
+	INTERFACE="$1"
+fi
+
+[ -n "$INTERFACE" ] && IP=$(/sbin/ifconfig $INTERFACE | grep -i inet | awk '{print $2}' | awk -F ":" '{print $2}')
+
+[  -n "$IP" ] && echo $IP
+

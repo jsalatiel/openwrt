@@ -1,0 +1,21 @@
+#!/bin/sh
+
+UPSCRIPTS="/etc/hotplug.net/$INTERFACE/up"
+DOWNSCRIPTS="/etc/hotplug.net/$INTERFACE/down"
+
+if [ $ACTION == "add" ] || [ $ACTION == "move" ] ; then
+	if [ -d "$UPSCRIPTS" ] ; then
+		logger Running scripts from $UPSCRIPTS 
+		for script in $UPSCRIPTS/* ; do
+			[ -x "$script" ] && logger Running $script $INTERFACE && $script $INTERFACE
+		done
+	fi
+elif [ $ACTION == "remove" ] ; then
+	if [ -d "$DOWNSCRIPTS" ] ; then
+		logger Running scripts from $DOWNSCRIPTS 
+		for script in $DOWNSCRIPTS/* ; do
+			[ -x "$script" ] && logger Running $script $INTERFACE && $script $INTERFACE
+		done
+	fi
+fi
+

@@ -1,0 +1,9 @@
+#!/bin/sh
+if [ $# != 1 ] ; then
+	echo Use $0 user
+	exit 1
+fi
+
+home_dir=$(cat /etc/passwd | grep -i $1  | awk -F':' '{print $(NF-1)}')
+[ -n "$home_dir" ] || echo Home for $1 not found.
+ssh-keygen -E sha256 -l -f $home_dir/.ssh/authorized_keys

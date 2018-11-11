@@ -1,0 +1,62 @@
+#!/bin/bash
+
+function is_valid_ip()
+{
+    local  ip=$1
+    local  stat=1
+
+    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        OIFS=$IFS
+        IFS='.'
+        ip=($ip)
+        IFS=$OIFS
+        [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
+            && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+        stat=$?
+    fi
+    return $stat
+}
+
+
+
+if [ $# != 2 ] ; then
+        echo Use $0 ip password 
+        exit 1
+fi
+
+if is_valid_ip $1 ; then
+	ipaddr=$1
+else
+	ipaddr=$(host $1 | awk '{print $NF}')
+fi
+
+
+echo sending sync ...
+sysrq_key="s"  # the SysRq key(s)
+password="$2"
+seqno="$(date +%s)"
+salt="$(dd bs=12 count=1 if=/dev/urandom 2>/dev/null |  openssl enc -base64)"
+req="$sysrq_key,$seqno,$salt"
+req="$req,$(echo -n "$req,$ipaddr,$password" | sha1sum | cut -c1-40)"
+
+if which socat &>/dev/null ; then
+        echo "$req" | socat stdin udp\-sendto:$ipaddr:9
+else
+        echo "$req" | nc -u -w2 $ipaddr 9
+fi
+
+sleep 3
+echo sending reboot ...
+
+sysrq_key="b"  # the SysRq key(s)
+seqno="$(date +%s)"
+salt="$(dd bs=12 count=1 if=/dev/urandom 2>/dev/null |  openssl enc -base64)"
+req="$sysrq_key,$seqno,$salt"
+req="$req,$(echo -n "$req,$ipaddr,$password" | sha1sum | cut -c1-40)"
+
+if which socat &>/dev/null ; then
+        echo "$req" | socat stdin udp\-sendto:$ipaddr:9
+else
+        echo "$req" | nc -u -w2 $ipaddr 9
+fi
+

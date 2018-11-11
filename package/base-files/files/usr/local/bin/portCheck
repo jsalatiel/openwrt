@@ -1,0 +1,36 @@
+#!/bin/bash
+export PATH=$PATH:/usr/local/bin:/root/bin
+
+if [ $# == 0 ] ; then
+	echo Use $0 PORT
+	exit 1
+fi
+PORT="$1"
+INTERFACE="$2"
+unset HTTP
+
+if [ -n "$INTERFACE" ] && which curl &>/dev/null  ; then
+HTTP=$(curl -s --interface $INTERFACE --connect-timeout 30 -referer=http://www.portchecktool.com/ --user-agent  'Mozilla/5.0 Gecko/20100101 Firefox/40.0' \
+	--data "port=$PORT&submit=Check+your+port" http://www.portchecktool.com/ -o - | html2text | grep x | grep -i 'success!\|problem!' )
+else
+	HTTP=$(wget -t 3 -T 15 -q --referer=http://www.portchecktool.com/ --user-agent  'Mozilla/5.0 Gecko/20100101 Firefox/40.0'  \
+		--post-data="port=$PORT&submit=Check+your+port" http://www.portchecktool.com/ -O - | html2text | grep x | grep -i 'success!\|problem!' )
+fi
+if [ -z "$HTTP" ] ; then
+	exitCode=254
+else
+	exitCode=$(echo $HTTP | grep -ci problem)
+fi
+
+case $exitCode in
+	0)
+		echo Opened
+		;;
+	1)
+		echo Closed
+		;;
+	*)
+		echo Invalid http response from portcheck
+		;;
+esac
+exit $exitCode

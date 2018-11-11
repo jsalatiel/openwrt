@@ -1,0 +1,36 @@
+#!/bin/sh
+export PATH=$PATH:/usr/local/bin:/root/bin
+
+if [ ! -x "`which sendmail`" ] || [ ! -x "`which ssmtp`" ] || [ ! -x "`which mailx`" ] ; then
+        echo Missing sendmail or mailx binaries.
+        exit 1
+fi
+
+if [ $# == 0 ]  ; then
+        echo Use $0 [-a attach]\+ Subject Message \[ address \]
+        exit 0
+fi
+
+attach=""
+while [ "$1" == '-a' ] ; do
+        export attach=$attach" -a $2 "
+        shift 2
+done
+
+if [ $# == 2 ] ; then
+       DEST=root
+else
+       DEST="-b root $3"
+fi
+
+mailx -v $attach -r "`hostname`@mailer.d(`hostname`)" -s "`hostname`: $1" $DEST  <<-!
+	$(date)
+	$2
+!
+
+if [ $? != 0 ] ; then
+	which at &>/dev/null && atn 1 mailer <<-!
+		/usr/bin/mailer $attach "$1" "$2" $3
+!
+fi
+
